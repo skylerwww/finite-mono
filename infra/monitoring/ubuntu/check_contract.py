@@ -85,7 +85,7 @@ def check_versions() -> None:
 def check_caddy() -> None:
     caddy = read(UBUNTU / "Caddyfile")
     require_contains(caddy, "monitoring.finite.computer", "Caddyfile")
-    require_contains(caddy, "crm.finite.computer", "Caddyfile")
+    require_contains(caddy, "business.finite.computer", "Caddyfile")
     require_contains(caddy, "metrics-ingest.finite.computer", "Caddyfile")
     require_contains(caddy, "admin unix//run/finite-monitoring-caddy/admin.sock", "Caddyfile")
     require_contains(caddy, "reverse_proxy 127.0.0.1:3000", "Grafana route")
@@ -110,7 +110,7 @@ def check_prometheus() -> None:
         "finite.computer",
         "chat.finite.computer",
         "brain.finite.computer",
-        "crm.finite.computer",
+        "business.finite.computer",
         "finitechat-native-mockup.finite.chat",
         "uptime-probe.docs.finite.chat",
     ]:
