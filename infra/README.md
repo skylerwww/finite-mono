@@ -103,6 +103,7 @@ capacity. The one accepted next candidate and its hard gates live in
 | **finite-lat-1** (64.34.82.77) | **Consolidated NixOS app server and existing-Agent Kata Runner** (`infra/nixos/`). NixOS 25.11; single-disk root and `/data`; no swap at the 2026-07-18 inventory. New creation is drained; the Runner timer remains active for existing-Agent lifecycle work. The private lat3 WireGuard path, peer-scoped firewall, Core socket proxy, and multi-Runner Core are active declarative configuration from merged PR #134; no runtime bridge override remains. | finite-saas-core (:4200), dashboard (podman :3000), **native** Postgres 16 (`services.postgresql`, `finite_core`, 87 FP keys), finitechat-server (:8788), finitechat-hosted-device (loopback only, per-WorkOS-user identity and encrypted store), FiniteBrain (:3015), finitesitesd (:8787), finite-search (SearXNG :8080 + Firecrawl), finite-saas-runner (Kata), a separately fenced **dark/disabled** Phala API worker definition, and **one** Caddy edge. NO k3s, NO Traefik, NO on-host image builds. Deploy: CI-built `lat1-nixos-closure-REV` artifact copied and switched by `scripts/deploy-lat1-closure-cache`. |
 | **finite-lat-2** (64.34.80.19) | **Decommission target** (Ubuntu 26.04+nix at last inventory). Historical service captures are in `hosts/lat2/`; private legacy/archive data must be moved off-box through `runbooks/decommission-lat2.md` before repurpose or release. | No production service, CI, build, deploy, Agent capacity, recovery authority, or archive authority may run here. The installed GitHub runners are removal inventory only (`hosts/lat2/runners.md`). finite-saas-sites / finite-search / finite-core-tunnel are **DISABLED** and migrated to lat1. |
 | **finite-lat-3** (207.188.7.157) | **NixOS 26.05 Agent Runner accepting new creation, hard limit 42.** Kernel 6.18.39; 187 GiB RAM; exact-size RAID1 root and `/data`; dual ESPs; 64-GiB swapfile plus zswap. | The Runner timer is enabled declaratively with `FC_RUNNER_DRAIN=false` and `FC_RUNNER_MAX_SANDBOXES=42`. This owner-authorized ceiling deliberately overcommits the declared 8-GiB guest maximum against physical RAM; swap is not counted as usable Agent capacity. No Recovery Authority exists here. |
+| **finite-monitoring-1-81926** (152.236.5.27) | Dedicated Ubuntu 24.04 monitoring receiver. The accepted NixOS definition is a future replacement, not the active path. | Native systemd Grafana, Prometheus, Loki, blackbox exporter, and one Caddy edge. The digest-pinned private Twenty commercial-register definition under `infra/commercial-register/` is the reviewed candidate for this host; it is not observed as deployed until `scripts/finite-status` reports it configured and green. |
 | **smoke** (15.204.56.61) | Legacy Nix-fleet box; Brain rollback source | Legacy finite-brain on :3015 (`brain.smoke.finite.computer`). It is not a replica and must not be selected implicitly. |
 | **clawland** (15.204.108.57) | Legacy finite.vip fleet box | Legacy `*.finite.vip` fleet (k3s + Traefik + oauth2-proxy, `finited`, ~50 agent namespaces). finitechat-server here is **DISABLED** (migrated to lat1). |
 | Tinfoil | Measured enclaves (unchanged) | DeepSeek V4 Flash 0731 inference + finite-private-limiter enclave; searxng enclave. The historical container/hostname remains `kimi-k2-6`, and `glm-5-2` remains a mixed-version request alias. The limiter validates usage against **lat1** Core. Deployed from the public satellite repos (`tinfoil/`). |
@@ -110,6 +111,9 @@ capacity. The one accepted next candidate and its hard gates live in
 ## DNS (current)
 
 - `finite.computer`, `brain.finite.computer`, `chat.finite.computer` → **lat1** (Namecheap).
+- `monitoring.finite.computer`, `metrics-ingest.finite.computer` → the dedicated
+  monitoring VM (Namecheap). `crm.finite.computer` joins that exact host only
+  after its private origin, off-host backup, and empty-target restore are green.
 - `*.finite.chat` → **Cloudflare** (Full strict) → lat1 origin (Cloudflare
   Origin CA cert); `*.docs.finite.chat` same edge.
 - `brain.finite.computer` is the canonical production Brain signing/API
@@ -126,6 +130,8 @@ capacity. The one accepted next candidate and its hard gates live in
 **No secret values in this repo, ever.** This repo is public. Secrets live
 where they run: on lat1, root-owned `/etc/finite/*.env` and
 `/etc/finite-saas/` files (bootstrap checklist in `infra/nixos/README.md`);
+on the monitoring VM, root-owned `/etc/finite/monitoring/` and
+`/etc/finite/commercial-register/` files;
 Tinfoil sealed secrets; Phala sealed env; the legacy fleet's k8s Secrets on
 smoke/clawland. Each host README documents which secrets each service needs —
 variable **names** and where the value lives, never the value. If you find a
@@ -159,8 +165,9 @@ lat1's `FC_FINITE_PRIVATE_USAGE_API_TOKEN` — do NOT rotate at cutover).
    the host, or pin the previous rev. Source of truth: `infra/nixos/`. The old
    bare-metal transcript in `infra/runbooks/lat1-nixos-reinstall.md` is
    historical and not current wipe authority.
-2. **Images are built by CI**, tagged with the git SHA, pushed to GHCR, and
-   deployed by digest. No on-host builds.
+2. **First-party images are built by CI**, tagged with the git SHA, pushed to
+   GHCR, and deployed by digest. Reviewed upstream third-party images are also
+   deployed only by digest. No on-host builds.
 3. **Binaries ship from release tags** (component-scoped: `finitechat/v*`,
    `fsite/v*`, `fbrain/v*`, `runtime-image/*`, `core/v*`).
 4. **Deploy scripts / runbooks live here**, are idempotent, take an explicit
