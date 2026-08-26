@@ -17,6 +17,7 @@ OUTPUT_NAMES = (
     "run_dashboard",
     "run_dashboard_browser",
     "run_electron_alpha",
+    "run_commercial",
     "run_hermes_bridge",
     "run_nix_checks",
     "run_skills_check",
@@ -134,6 +135,7 @@ class HarnessSelection:
     run_dashboard: bool = False
     run_dashboard_browser: bool = False
     run_electron_alpha: bool = False
+    run_commercial: bool = False
     run_hermes_bridge: bool = False
     run_nix_checks: bool = False
     run_skills_check: bool = False
@@ -312,6 +314,10 @@ def apply_path(selection: HarnessSelection, path: str) -> None:
 
     if path.startswith("finite-search/"):
         selection.run_search_check = True
+        return
+
+    if path.startswith("commercial-register/"):
+        selection.run_commercial = True
         return
 
     if path.startswith("finitecomputer-v2/apps/dashboard/"):

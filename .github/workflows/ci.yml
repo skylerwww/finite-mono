@@ -28,6 +28,7 @@ jobs:
       run_dashboard: ${{ steps.detect.outputs.run_dashboard }}
       run_dashboard_browser: ${{ steps.detect.outputs.run_dashboard_browser }}
       run_electron_alpha: ${{ steps.detect.outputs.run_electron_alpha }}
+      run_commercial: ${{ steps.detect.outputs.run_commercial }}
       run_hermes_bridge: ${{ steps.detect.outputs.run_hermes_bridge }}
       run_nix_checks: ${{ steps.detect.outputs.run_nix_checks }}
       run_skills_check: ${{ steps.detect.outputs.run_skills_check }}
@@ -191,6 +192,19 @@ jobs:
           name: finite-chat-electron-alpha-macos-${{ runner.arch }}
           path: finitechat/apps/electron-chat/release/finite-chat-electron-alpha.zip
           if-no-files-found: error
+
+  commercial-register:
+    name: Commercial register
+    needs: changes
+    if: needs.changes.outputs.run_commercial == 'true'
+    runs-on: depot-ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@v16
+      - name: Check versioned Twenty app and agent interface
+        run: nix develop --accept-flake-config --command just commercial check
+      - name: Test versioned Twenty app and agent interface
+        run: nix develop --accept-flake-config --command just commercial test
 
   hermes-bridge:
     name: finitechat Hermes bridge
@@ -776,6 +790,7 @@ jobs:
       - rust
       - dashboard
       - electron-alpha
+      - commercial-register
       - hermes-bridge
       - skills-check
       - search-check
@@ -795,6 +810,8 @@ jobs:
       RESULT_DASHBOARD: ${{ needs.dashboard.result }}
       RUN_ELECTRON_ALPHA: ${{ needs.changes.outputs.run_electron_alpha }}
       RESULT_ELECTRON_ALPHA: ${{ needs['electron-alpha'].result }}
+      RUN_COMMERCIAL: ${{ needs.changes.outputs.run_commercial }}
+      RESULT_COMMERCIAL: ${{ needs['commercial-register'].result }}
       RUN_HERMES_BRIDGE: ${{ needs.changes.outputs.run_hermes_bridge }}
       RESULT_HERMES_BRIDGE: ${{ needs['hermes-bridge'].result }}
       RUN_SKILLS_CHECK: ${{ needs.changes.outputs.run_skills_check }}
@@ -849,6 +866,7 @@ jobs:
           check_selected "Rust workspace" "$RUN_RUST" "$RESULT_RUST"
           check_selected "Dashboard" "$RUN_DASHBOARD" "$RESULT_DASHBOARD"
           check_selected "Electron alpha" "$RUN_ELECTRON_ALPHA" "$RESULT_ELECTRON_ALPHA"
+          check_selected "Commercial register" "$RUN_COMMERCIAL" "$RESULT_COMMERCIAL"
           check_selected "Hermes bridge" "$RUN_HERMES_BRIDGE" "$RESULT_HERMES_BRIDGE"
           check_selected "Skills check" "$RUN_SKILLS_CHECK" "$RESULT_SKILLS_CHECK"
           check_selected "Search check" "$RUN_SEARCH_CHECK" "$RESULT_SEARCH_CHECK"
