@@ -40,7 +40,7 @@ not been exercised yet are marked `TODO:` with what must be learned.
 | [platform-rollout.md](platform-rollout.md) | **The manual cross-component wave** — ordering (runners before Core), gates, layered verify ritual, and lifecycle-rollback sequencing across the deploy runbooks below |
 | [production-cd.md](production-cd.md) | Protected GitHub Actions production deploy bootstrap, setup verification, enablement, and first deploy flow |
 | [deploy-core.md](deploy-core.md) | finite-saas-core + dashboard on lat1 (NixOS: systemd core + podman dashboard, `nixos-rebuild`) |
-| [deploy-sites.md](deploy-sites.md) | finitesitesd on lat1 (NixOS `nixos-rebuild`; flags the KATA / `--app-runner none` gap) |
+| [deploy-sites.md](deploy-sites.md) | static-only finitesitesd v2 validation service on NixOS |
 | [deploy-finitechat-server.md](deploy-finitechat-server.md) | Chat server on lat1 (:8788) + the single-writer doctrine |
 | [deploy-brain.md](deploy-brain.md) | finite-brain on lat1 at `brain.finite.computer`, with the dashboard-embedded WorkOS client; SQLite migration and rollback |
 | [decommission-lat2.md](decommission-lat2.md) | **Superseded for the emergency** — legacy credential rotation and runner-removal inventory only; the wipe is Gate A of the cutover |

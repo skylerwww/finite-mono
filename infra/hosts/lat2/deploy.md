@@ -52,6 +52,7 @@ provenance is structurally absent, not just unrecorded.
 4. Rollback = `sudo install` the `.prev` binary back and restart, same as
    today.
 
-Config (units, Caddyfile, polkit, sudoers) deploys from this tree, not from
-the sites source checkout; the on-box `~/finite-sites` checkout stops being
-a deploy input entirely and can be deleted once the target flow lands.
+At the time this superseded flow was written, config units, Caddyfile, polkit,
+and sudoers deployed from this tree rather than from the sites source checkout.
+ADR 0028 later removed the Sites app-runner polkit/sudoers files from the
+current tree.

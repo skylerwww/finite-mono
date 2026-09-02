@@ -61,7 +61,7 @@ CONTRACT: dict[str, Any] = {
             "finitechat-server": "http://127.0.0.1:8788/readyz",
             "hosted-web-device": "http://127.0.0.1:38918/healthz",
             "finite-brain": "http://127.0.0.1:3015/health",
-            "finitesitesd": "http://127.0.0.1:8787/api/v1/healthz",
+            "finitesitesd": "http://127.0.0.1:8787/api/v2/healthz",
             "node-exporter": "http://127.0.0.1:9100/metrics",
         },
     },

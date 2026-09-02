@@ -72,9 +72,6 @@ in
     ./invariants.nix
     ./storage-health.nix
     ../../modules/import-mode.nix
-    # Sites' tier-2 Kata apps need the shared containerd host runtime; this
-    # host runs no Agent Runner, so it imports the runtime without the role.
-    ../../modules/kata-host-runtime.nix
     ../../modules/finite-saas-core.nix
     ../../modules/finite-identity.nix
     ../../modules/finitechat-server.nix
@@ -152,13 +149,6 @@ in
     {
       assertion = config.fileSystems."/data".device == "/dev/md/data";
       message = "finite-lat-2 /data must be the named data MD array";
-    }
-    {
-      # Sites' tier-2 apps run through the shared Kata host runtime; the KVM
-      # module must be loaded or every Kata guest launch fails at runtime.
-      assertion =
-        !config.virtualisation.containerd.enable || builtins.elem "kvm-amd" config.boot.kernelModules;
-      message = "finite-lat-2 Kata app runtime requires the kvm-amd kernel module";
     }
   ];
 
@@ -385,11 +375,6 @@ in
       "raid1"
     ];
   };
-  # Sites' tier-2 Kata apps run guests through QEMU/KVM via the shared Kata
-  # host runtime: the KVM module must be loaded at boot even though this
-  # host runs no Agent Runner. Assertion below fails the build if the
-  # runtime and the module ever drift apart.
-  boot.kernelModules = [ "kvm-amd" ];
   # The BMC's ASPEED adapter owns the host console on this chassis class; the
   # unused iGPU has no firmware on this headless server and otherwise logs
   # fatal amdgpu initialization errors on every boot.

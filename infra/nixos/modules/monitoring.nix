@@ -257,7 +257,7 @@ in
         check finitechat-server   http://127.0.0.1:8788/readyz
         check hosted-web-device   http://127.0.0.1:38918/healthz
         check finite-brain        http://127.0.0.1:3015/health
-        check finitesitesd        -H "Host: api.finite.chat" http://127.0.0.1:8787/api/v1/healthz
+        check finitesitesd        -H "Host: api.finite.chat" http://127.0.0.1:8787/api/v2/healthz
         check node-exporter       http://127.0.0.1:9100/metrics
 
         publish_metrics

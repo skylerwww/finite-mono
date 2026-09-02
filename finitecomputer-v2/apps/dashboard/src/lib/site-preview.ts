@@ -153,7 +153,7 @@ export async function createSitePreviewSession(machineId: string, rawUrl: unknow
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        output_url: target.outputUrl,
+        site_url: target.outputUrl,
         authorization: proof.authorization_header,
         signed_body: proof.body_json,
       }),

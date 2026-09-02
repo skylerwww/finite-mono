@@ -211,6 +211,16 @@
         ];
       };
 
+      # Dedicated static-only Finite Sites v2 validation host (ADR 0028).
+      sitesV2 = nixpkgs-lat3.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = runnerSpecialArgs;
+        modules = [
+          revisionModule
+          ./infra/nixos/hosts/finite-sites-v2
+        ];
+      };
+
       monitoring = nixpkgs-lat3.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
@@ -243,10 +253,10 @@
           hermes-agent-python = hermesAgentMinimal.hermesVenv;
           agent-runtime-toolchains =
             hermesPkgs.callPackage
-            ./finitecomputer-v2/deploy/finite-computer/images/agent-runtime-toolchains.nix
-            {
-              hermesAgent = hermesAgentPackage;
-            };
+              ./finitecomputer-v2/deploy/finite-computer/images/agent-runtime-toolchains.nix
+              {
+                hermesAgent = hermesAgentPackage;
+              };
         };
 
       systemOutputs = flake-utils.lib.eachDefaultSystem (
@@ -307,59 +317,59 @@
         {
           packages = (hermesPackagesFor system) // finitePackages;
 
-          devShells =
-            {
-              default = pkgs.mkShell {
-                packages =
-                  rustBasePackages
-                  ++ [
-                    pkgs.age
-                    gcxCli
-                    litestreamCli
-                    pyToolPkgs.ruff
-                    pkgs.sops
-                  ]
-                  ++ (with pkgs; [
-                    nodejs_24
-                    pnpm
-                    rsync
-                    sqlite
-                    xxd
-                    rustToolchain
+          devShells = {
+            default = pkgs.mkShell {
+              packages =
+                rustBasePackages
+                ++ [
+                  pkgs.age
+                  gcxCli
+                  litestreamCli
+                  pyToolPkgs.ruff
+                  pkgs.sops
+                ]
+                ++ (with pkgs; [
+                  nodejs_24
+                  pnpm
+                  rsync
+                  sqlite
+                  xxd
+                  rustToolchain
                 ])
+                ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [ pkgs.xcodegen ]
                 ++ pkgs.lib.optionals pkgs.stdenv.isLinux [ pkgs.chromium ];
 
-                RUST_SRC_PATH = "${rustToolchain}/lib/rustlib/src/rust/library";
-              };
-
-              rust-ci = pkgs.mkShell {
-                packages = rustCiPackages;
-              };
-
-              devfinity-ci = pkgs.mkShell {
-                packages = devfinityCiPackages;
-              };
-
-              # Entering this shell is one of the few things that forces the
-              # hermes inputs (see hermesPackagesFor) — the shells above stay
-              # hermes-free so unrelated CI jobs never fetch hermes.
-              hermes-bridge-ci =
-                let
-                  hermesAgentRuntime = hermes-agent.packages.${system}.default;
-                  hermesAgentRuntimePython = hermesAgentRuntime.hermesVenv;
-                in
-                pkgs.mkShell {
-                  packages = [
-                    hermesAgentRuntime
-                    hermesAgentRuntimePython
-                    pyToolPkgs.basedpyright
-                    pyToolPkgs.ruff
-                  ];
-
-                  HERMES_AGENT_RUNTIME_PYTHON = "${hermesAgentRuntimePython}/bin/python3";
-                  HERMES_AGENT_PYTHON = "${hermesAgentRuntimePython}/bin/python3";
-                };
+              RUST_SRC_PATH = "${rustToolchain}/lib/rustlib/src/rust/library";
             };
+
+            rust-ci = pkgs.mkShell {
+              packages = rustCiPackages;
+            };
+
+            devfinity-ci = pkgs.mkShell {
+              packages = devfinityCiPackages;
+            };
+
+            # Entering this shell is one of the few things that forces the
+            # hermes inputs (see hermesPackagesFor) — the shells above stay
+            # hermes-free so unrelated CI jobs never fetch hermes.
+            hermes-bridge-ci =
+              let
+                hermesAgentRuntime = hermes-agent.packages.${system}.default;
+                hermesAgentRuntimePython = hermesAgentRuntime.hermesVenv;
+              in
+              pkgs.mkShell {
+                packages = [
+                  hermesAgentRuntime
+                  hermesAgentRuntimePython
+                  pyToolPkgs.basedpyright
+                  pyToolPkgs.ruff
+                ];
+
+                HERMES_AGENT_RUNTIME_PYTHON = "${hermesAgentRuntimePython}/bin/python3";
+                HERMES_AGENT_PYTHON = "${hermesAgentRuntimePython}/bin/python3";
+              };
+          };
 
           formatter = pkgs.nixfmt-rfc-style;
         }
@@ -391,6 +401,7 @@
             finite-lat-4-disko = lat4.config.system.build.diskoScript;
             finite-lat-4-kexec = lat4Kexec.config.system.build.kexecInstallerTarball;
             finite-lat-4-nixos-anywhere = nixos-anywhere.packages.x86_64-linux.nixos-anywhere;
+            finite-sites-v2-system = sitesV2.config.system.build.toplevel;
             finite-monitoring-system = monitoring.config.system.build.toplevel;
           };
       };
@@ -424,6 +435,10 @@
       # and admitted only through
       # infra/runbooks/lat4-nixos-runner-install.md; it starts drained.
       nixosConfigurations.finite-lat-4 = lat4;
+
+      # Dedicated static-only Finite Sites v2 validation host (ADR 0028).
+      # The current app-plane hosts keep their canonical edge until cutover.
+      nixosConfigurations.finite-sites-v2 = sitesV2;
 
       # Dedicated NixOS Grafana/Prometheus/Loki receiver. This is the hard-cut
       # replacement for the historical monitoring Docker Compose stack.
